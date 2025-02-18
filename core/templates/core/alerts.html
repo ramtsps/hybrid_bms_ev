@@ -1,0 +1,111 @@
+{% extends 'core/base.html' %} {% load static %} {% block content %}
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var alertSound = document.getElementById("alertSound");
+    var noAlertsMessage = document.getElementById("noAlertsMessage");
+
+    // Function to fetch alerts dynamically every 5 seconds
+    function updateAlerts() {
+      fetch("/api/alerts/")
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Updated Alerts:", data); // Debugging log
+
+          var alertContainer = document.querySelector(".alert-container");
+          alertContainer.innerHTML = ""; // Clear previous alerts
+
+          if (data.alerts.length > 0) {
+            noAlertsMessage.style.display = "none"; // Hide "No Alerts!" message
+
+            data.alerts.forEach((alert, index) => {
+              var alertHtml = `
+                <div class="alert alert-${alert.type} shadow-lg" role="alert" id="alert_${index}">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span class="alert-icon" style="font-size: 1.7rem; padding-right: 10px">
+                      ${alert.icon}
+                    </span>
+                    <div class="alert-text" style="text-align: left; width: 100%">
+                      <strong class="d-block" style="font-size: 1.2rem; font-weight: 600; color: #333">
+                        ${alert.title}
+                      </strong>
+                      <span class="d-block" style="font-size: 1.1rem; color: #555">
+                        ${alert.message}
+                      </span>
+                    </div>
+                    <button type="button" class="btn-close" aria-label="Close" onclick="closeAlert(${index})"></button>
+                  </div>
+                </div>
+              `;
+              alertContainer.innerHTML += alertHtml;
+            });
+
+            // Play alert sound
+            alertSound.play().catch((e) => console.log("Autoplay blocked:", e));
+          } else {
+            noAlertsMessage.style.display = "block"; // Show "No Alerts!" message
+          }
+        })
+        .catch((error) => console.error("Error fetching alerts:", error));
+    }
+
+    // Function to handle closing an alert
+    window.closeAlert = function (alertId) {
+      var alertElement = document.getElementById("alert_" + alertId);
+      if (alertElement) {
+        alertElement.style.display = "none"; // Hide the alert
+      }
+
+      // Check if there are any remaining alerts
+      var remainingAlerts = document.querySelectorAll(
+        ".alert-container .alert:not([style*='display: none'])"
+      );
+      if (remainingAlerts.length === 0) {
+        alertSound.pause();
+        noAlertsMessage.style.display = "block"; // Show "No Alerts!" message
+      }
+    };
+
+    // Fetch alerts every 5 seconds
+    setInterval(updateAlerts, 5000);
+    updateAlerts(); // Call immediately on page load
+  });
+</script>
+
+<div class="container mt-4">
+  <div class="container mt-5" style="max-width: 900px">
+    <div
+      class="card shadow-lg p-5 mb-4"
+      style="
+        background: linear-gradient(135deg, #6a11cb, #2575fc);
+        border-radius: 20px;
+      "
+    >
+      <h1 class="text-center text-white fw-bold">🚨 Alerts & Notifications</h1>
+      <p class="text-center text-white" style="font-size: 1.2rem; opacity: 0.8">
+        Stay updated with important vehicle notifications and ensure optimal
+        performance!
+      </p>
+    </div>
+
+    <div class="alert-container"></div>
+
+    <!-- "No Alerts!" Message -->
+    <div
+      class="alert alert-secondary shadow-lg text-center"
+      role="alert"
+      id="noAlertsMessage"
+    >
+      <strong>No Alerts!</strong> Your vehicle is in good condition.
+    </div>
+  </div>
+
+  <!-- Alert Sound -->
+  <audio
+    id="alertSound"
+    src="{% static 'audio/alert.mp3' %}"
+    preload="auto"
+  ></audio>
+</div>
+
+{% endblock %} {% block title %}Alerts{% endblock %}

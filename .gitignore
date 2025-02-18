@@ -1,0 +1,41 @@
+# Python bytecode files
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# Virtual environments
+venv/
+env/
+*.env
+
+# Python packaging
+*.egg-info/
+dist/
+build/
+
+# IDE/editor files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Operating system files
+.DS_Store  # macOS
+Thumbs.db  # Windows
+
+# Logs
+*.log
+
+# Test and coverage reports
+.coverage
+nosetests.xml
+pytest*.xml
+*.cover
+
+# Jupyter notebook checkpoints
+.ipynb_checkpoints/
+
+# Credentials
+*.pem
+*.key

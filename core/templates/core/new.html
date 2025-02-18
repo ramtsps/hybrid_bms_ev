@@ -1,0 +1,64 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vehicle Data</title>
+    <script>
+      function fetchVehicleData() {
+        fetch("{% url 'get_vehicle_data' %}") // Ensure the URL matches your Django URL pattern
+          .then((response) => response.json())
+          .then((data) => {
+            document.getElementById("battery_percentage").innerText =
+              data.battery_percentage + "%";
+            document.getElementById("battery_temperature").innerText =
+              data.battery_temperature + "°C";
+            document.getElementById("cng_pressure").innerText =
+              data.cng_pressure + " bar";
+            document.getElementById("cng_temperature").innerText =
+              data.cng_temperature + "°C";
+            document.getElementById("gas_leak_detected").innerText =
+              data.gas_leak_detected ? "🚨 Yes" : "✅ No";
+          })
+          .catch((error) => console.error("Error fetching data:", error));
+      }
+
+      // Refresh data every 2 seconds
+      setInterval(fetchVehicleData, 2000);
+      document.addEventListener("DOMContentLoaded", fetchVehicleData); // Fetch on page load
+    </script>
+  </head>
+  <body>
+    <h2>🚗 Vehicle Status</h2>
+    <p>
+      <strong>Battery Percentage:</strong>
+      <span id="battery_percentage"
+        >{{ request.session.battery_percentage }}%</span
+      >
+    </p>
+    <p>
+      <strong>Battery Temperature:</strong>
+      <span id="battery_temperature"
+        >{{ request.session.battery_temperature }}°C</span
+      >
+    </p>
+    <p>
+      <strong>CNG Pressure:</strong>
+      <span id="cng_pressure">{{ request.session.cng_pressure }} bar</span>
+    </p>
+    <p>
+      <strong>CNG Temperature:</strong>
+      <span id="cng_temperature">{{ request.session.cng_temperature }}°C</span>
+    </p>
+    <p>
+      <strong>Gas Leak Detected:</strong>
+      <span id="gas_leak_detected">
+        {% if request.session.gas_leak_detected %}
+
+        <p>🚨 Yes {% else %} ✅ No</p>
+        {% endif %}
+      </span>
+    </p>
+  </body>
+</html>

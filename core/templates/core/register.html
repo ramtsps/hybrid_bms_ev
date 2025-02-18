@@ -1,0 +1,87 @@
+{% extends 'core/base.html' %} {% block content %}
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow-lg p-4">
+        <div class="card-body">
+          <h2 class="text-center mb-4">Register</h2>
+
+          <!-- Flash Messages -->
+          {% if messages %} {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} text-center">
+            {{ message }}
+          </div>
+          {% endfor %} {% endif %}
+
+          <form method="POST">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label class="form-label">Full Name</label>
+              <input type="text" name="name" class="form-control" required />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Mobile Number</label>
+              <input type="text" name="mobile" class="form-control" required />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Email</label>
+              <input type="email" name="email" class="form-control" required />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Vehicle Type</label>
+              <input
+                type="text"
+                name="vehicle_type"
+                class="form-control"
+                required
+              />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Vehicle Number</label>
+              <input
+                type="text"
+                name="vehicle_number"
+                class="form-control"
+                required
+              />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">CNG or Battery</label>
+              <select name="fuel_type" class="form-control">
+                <option value="CNG">CNG</option>
+                <option value="Battery">Battery</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Password</label>
+              <input
+                type="password"
+                name="password1"
+                class="form-control"
+                required
+              />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Confirm Password</label>
+              <input
+                type="password"
+                name="password2"
+                class="form-control"
+                required
+              />
+            </div>
+            <button type="submit" class="btn btn-success w-100">
+              Register
+            </button>
+          </form>
+
+          <p class="text-center mt-3">
+            Already have an account?
+            <a href="{% url 'login' %}">Login here</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block title %}Register{% endblock %}

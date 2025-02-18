@@ -1,0 +1,288 @@
+{% extends 'core/base.html' %} {% block content %}
+<script>
+  // Ensure the function runs after DOM is fully loaded
+  document.addEventListener("DOMContentLoaded", function () {
+    // Function to fetch and update vehicle data
+    function updateVehicleData() {
+      // Fetch updated vehicle data from the API
+      fetch("/api/vehicle-data/")
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data); // Debugging log
+
+          // Calculate battery usage
+          let batteryUsage = 100 - data.battery_percentage;
+
+          // Update the HTML elements with the new data
+          const batteryPercentageElem =
+            document.getElementById("battery_percentage");
+          const batteryTemperatureElem = document.getElementById(
+            "battery_temperature"
+          );
+          const cngPressureElem = document.getElementById("cng_pressure");
+          const cngTemperatureElem = document.getElementById("cng_temperature");
+          const gasLeakStatusElem = document.getElementById("gas_leak_status");
+
+          // Update only if the elements exist
+          if (batteryPercentageElem) {
+            batteryPercentageElem.innerText = `${data.battery_percentage}%`;
+          }
+          if (batteryTemperatureElem) {
+            batteryTemperatureElem.innerText = `${data.battery_temperature}°C`;
+          }
+          if (cngPressureElem) {
+            cngPressureElem.innerText = `${data.cng_pressure} bar`;
+          }
+          if (cngTemperatureElem) {
+            cngTemperatureElem.innerText = `${data.cng_temperature}°C`;
+          }
+          if (gasLeakStatusElem) {
+            gasLeakStatusElem.innerText = data.gas_leak_detected
+              ? "🚨 Yes"
+              : "✅ No";
+          }
+
+          // Update progress bars
+          const batteryPercentageBar = document.getElementById(
+            "battery_percentage_bar"
+          );
+          const batteryUsageBar = document.getElementById("battery_usage_bar");
+          const cngPressureBar = document.getElementById("cng_pressure_bar");
+
+          if (batteryPercentageBar) {
+            batteryPercentageBar.style.width = `${data.battery_percentage}%`;
+          }
+          if (batteryUsageBar) {
+            batteryUsageBar.style.width = `${batteryUsage}%`;
+          }
+          if (cngPressureBar) {
+            cngPressureBar.style.width = `${data.cng_pressure}%`;
+          }
+
+          // Update battery usage text
+          const batteryUsageText = document.getElementById("battery_usage");
+          if (batteryUsageText) {
+            batteryUsageText.innerText = `${batteryUsage}%`;
+          }
+        })
+        .catch((error) => console.error("Error fetching vehicle data:", error));
+    }
+
+    // Update every 2 seconds
+    setInterval(updateVehicleData, 2000);
+
+    // Call the update function immediately to show the data when the page loads
+    updateVehicleData();
+  });
+</script>
+
+<!-- 🌟 Dashboard Header -->
+<div
+  class="container-fluid text-center py-4"
+  style="
+    background: linear-gradient(135deg, #0072ff, #00c6ff);
+    color: white;
+    border-bottom: 4px solid #0056b3;
+  "
+>
+  <h1 class="fw-bold">🚗 Welcome, {{ customer_name }}!</h1>
+  <p class="lead">Monitor your vehicle's health and performance below.</p>
+</div>
+
+<div class="container mt-4">
+  <div class="row">
+    <!-- 📌 Left Panel - Personal Information -->
+    <div class="col-md-3">
+      <div class="row">
+        <!-- 📝 Personal Information -->
+        <div class="col-12">
+          <div class="card shadow-lg p-3 bg-light mb-3">
+            <h4 class="text-center text-primary fw-bold">📝 Profile Details</h4>
+            <hr />
+            <p><strong>👤 Full Name:</strong> {{ customer_name }}</p>
+            <p><strong>📧 Email:</strong> {{ customer_email }}</p>
+            <p><strong>📞 Mobile:</strong> {{ customer_mobile }}</p>
+            <p><strong>🚗 Vehicle Type:</strong> {{ customer_vehicle_type }}</p>
+            <p><strong>🔢 Vehicle No:</strong> {{ customer_vehicle_number }}</p>
+            <p><strong>⛽ Fuel Type:</strong> {{ customer_fuel_type }}</p>
+          </div>
+        </div>
+
+        <!-- ⚡ EV Charging Stations -->
+        <div class="col-12">
+          <div
+            class="card shadow-lg p-3 bg-success text-white mb-3 text-center"
+          >
+            <h5>⚡ EV Charging Stations</h5>
+            <p>🔌 <strong>8</strong> Available</p>
+            <a href="{% url 'stations' %}" class="btn btn-light"
+              >Find Station</a
+            >
+          </div>
+        </div>
+
+        <!-- 🚨 Alerts & Notifications -->
+        <div class="col-12">
+          <div class="card shadow-lg p-3 bg-warning text-dark text-center">
+            <h5>🚨 Alerts & Notifications</h5>
+            <p>⚠️ Next maintenance in <strong>15 days</strong></p>
+            <a href="{% url 'alerts' %}" class="btn btn-dark">Check Alerts</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 📌 Right Panel - Vehicle Stats -->
+    <div class="col-md-9">
+      <div class="card shadow-lg p-4" style="height: 850px">
+        <h4 class="text-center text-dark fw-bold">
+          🔋 Vehicle Performance & Analytics
+        </h4>
+        <div
+          class="scrollable-section"
+          style="max-height: 820px; overflow-y: auto; padding-right: 15px"
+        >
+          <!-- Show Battery Stats if the vehicle fuel type is Battery -->
+          {% if customer_fuel_type == "Battery" %}
+          <div class="row">
+            <div class="col-md-4">
+              <div
+                class="info-card bg-primary text-white shadow-lg p-4 mb-4 text-center"
+                style="height: 180px"
+              >
+                <h5>⚡ Battery Percentage</h5>
+                <div class="progress" style="height: 20px; border-radius: 10px">
+                  <div
+                    class="progress-bar bg-success"
+                    role="progressbar"
+                    id="battery_percentage_bar"
+                    style="width: 50%"
+                  ></div>
+                </div>
+                <p id="battery_percentage">50%</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div
+                class="info-card bg-info text-dark shadow-lg p-4 mb-4 text-center"
+                style="height: 180px"
+              >
+                <h5>🔋 Battery Usage</h5>
+                <div class="progress" style="height: 20px; border-radius: 10px">
+                  <div
+                    class="progress-bar bg-success"
+                    role="progressbar"
+                    id="battery_usage_bar"
+                    style="width: 50%"
+                  ></div>
+                </div>
+                <p id="battery_usage">50%</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div
+                class="info-card bg-danger text-white shadow-lg p-4 mb-4 text-center"
+                style="height: 180px"
+              >
+                <h5>🔥 Battery Temperature</h5>
+                <p><strong id="battery_temperature">30°C</strong></p>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+
+          <!-- Show CNG Stats if the vehicle fuel type is CNG -->
+          {% if customer_fuel_type == "CNG" %}
+          <div class="row">
+            <div class="col-md-4">
+              <div
+                class="info-card bg-warning text-dark shadow-lg p-4 mb-4 text-center"
+                style="height: 180px"
+              >
+                <h5>⛽ CNG Pressure</h5>
+                <div class="progress" style="height: 20px; border-radius: 10px">
+                  <div
+                    class="progress-bar bg-success"
+                    role="progressbar"
+                    id="cng_pressure_bar"
+                    style="width: 50%"
+                  ></div>
+                </div>
+                <p id="cng_pressure">50%</p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div
+                class="info-card bg-info text-dark shadow-lg p-4 mb-4 text-center"
+                style="height: 180px"
+              >
+                <h5>💨 CNG Temperature</h5>
+                <p><strong id="cng_temperature">40°C</strong></p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div
+                class="info-card bg-danger text-white shadow-lg p-4 mb-4 text-center"
+                style="height: 180px"
+              >
+                <h5>🚨 Gas Leakage</h5>
+                <p id="gas_leak_status">No Leak Detected</p>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+          <div
+            class="bg-dark text-white shadow-lg p-4 mb-4"
+            style="height: 500px"
+          >
+            <h5>📊 {{ customer_fuel_type }} Performance Trends</h5>
+            <canvas id="performanceChart"></canvas>
+          </div>
+
+          <!-- JavaScript for Chart -->
+          <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+          <script>
+            // 🔋 Performance Chart (Battery or CNG)
+            const ctx1 = document
+              .getElementById("performanceChart")
+              .getContext("2d");
+            new Chart(ctx1, {
+              type: "line",
+              data: {
+                labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+                datasets: [
+                  {
+                    label: "{{ customer_fuel_type }} Efficiency",
+                    data: [80, 85, 78, 90, 75, 88],
+                    borderColor: "rgba(75, 192, 192, 1)",
+                    backgroundColor: "rgba(75, 192, 192, 0.2)",
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                  },
+                  {
+                    label: "Temperature Fluctuation",
+                    data: [30, 32, 35, 36, 37, 36],
+                    borderColor: "rgba(255, 206, 86, 1)",
+                    backgroundColor: "rgba(255, 206, 86, 0.2)",
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                  },
+                ],
+              },
+              options: {
+                responsive: true,
+                plugins: { legend: { display: true } },
+                scales: { y: { beginAtZero: true } },
+              },
+            });
+          </script>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

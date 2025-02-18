@@ -1,0 +1,303 @@
+{% extends 'core/base.html' %} {% block content %}
+<script>
+  function updateVehicleData() {
+    fetch("/api/vehicle-data/")
+      .then((response) => response.json())
+      .then((data) => {
+        // Update values on the page
+        document.getElementById(
+          "battery_percentage"
+        ).innerText = `${data.battery_percentage}%`;
+        document.getElementById(
+          "battery_temperature"
+        ).innerText = `${data.battery_temperature}°C`;
+        document.getElementById(
+          "cng_pressure"
+        ).innerText = `${data.cng_pressure} bar`;
+        document.getElementById(
+          "cng_temperature"
+        ).innerText = `${data.cng_temperature}°C`;
+        document.getElementById("gas_leak_status").innerText =
+          data.gas_leak_detected ? "🚨 Yes" : "✅ No";
+      })
+      .catch((error) =>
+        console.error("Error fetching vehicle data:", error)
+      );
+  }
+
+  // Update every 2 seconds
+  setInterval(updateVehicleData, 2000);
+
+  // Call the update function once to show the data immediately when the page loads
+  updateVehicleData();
+</script>
+<!-- 🌟 Dashboard Header -->
+<div
+  class="container-fluid text-center py-4"
+  style="
+    background: linear-gradient(135deg, #0072ff, #00c6ff);
+    color: white;
+    border-bottom: 4px solid #0056b3;
+  "
+>
+  <h1 class="fw-bold">🚗 Welcome, {{ customer_name }}!</h1>
+  <p class="lead">Monitor your vehicle's health and performance below.</p>
+</div>
+
+<div class="container mt-4">
+  <div class="row">
+    <!-- 📌 Left Panel (1 Part) - Personal Information -->
+    <div class="col-md-3">
+      <div class="row">
+        <!-- 📝 Personal Information -->
+        <div class="col-12">
+          <div class="card shadow-lg p-3 bg-light mb-3">
+            <h4 class="text-center text-primary fw-bold">📝 Profile Details</h4>
+            <hr />
+            <p><strong>👤 Full Name:</strong> {{ customer_name }}</p>
+            <p><strong>📧 Email:</strong> {{ customer_email }}</p>
+            <p><strong>📞 Mobile:</strong> {{ customer_mobile }}</p>
+            <p><strong>🚗 Vehicle Type:</strong> {{ customer_vehicle_type }}</p>
+            <p><strong>🔢 Vehicle No:</strong> {{ customer_vehicle_number }}</p>
+            <p><strong>⛽ Fuel Type:</strong> {{ customer_fuel_type }}</p>
+          </div>
+        </div>
+
+        <!-- ⚡ EV Charging Stations -->
+        <div class="col-12">
+          <div
+            class="card shadow-lg p-3 bg-success text-white mb-3 text-center"
+          >
+            <h5>⚡ EV Charging Stations</h5>
+            <p>🔌 <strong>8</strong> Available</p>
+            <a href="{% url 'stations' %}" class="btn btn-light"
+              >Find Station</a
+            >
+          </div>
+        </div>
+
+        <!-- 🚨 Alerts & Notifications -->
+        <div class="col-12">
+          <div class="card shadow-lg p-3 bg-warning text-dark text-center">
+            <h5>🚨 Alerts & Notifications</h5>
+            <p>⚠️ Next maintenance in <strong>15 days</strong></p>
+            <a href="{% url 'alerts' %}" class="btn btn-dark">Check Alerts</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 📌 Right Panel (3 Parts) - Vehicle Status & Graphs -->
+    <div class="col-md-9">
+      <div class="card shadow-lg p-4" style="height: 850px">
+        <h4 class="text-center text-dark fw-bold">
+          🔋 Vehicle Performance & Analytics
+        </h4>
+
+        <div
+          class="scrollable-section"
+          style="max-height: 820px; overflow-y: auto; padding-right: 15px"
+        >
+          {% if customer_fuel_type == "Battery" %}
+          <!-- 🟢 Battery Stats -->
+          <div class="row">
+            <div class="col-md-4">
+              <div
+                class="info-card bg-primary text-white shadow-lg p-4 mb-4 text-center"
+                style="height: 180px"
+              >
+                <h5>⚡ Battery Percentage</h5>
+                <div class="progress" style="height: 20px; border-radius: 10px">
+                  <div
+                    class="progress-bar bg-success"
+                    id="battery_percentage"
+                    role="progressbar"
+                    style="width: {{ battery_percentage }}%"
+                    aria-valuenow="{{ battery_percentage }}"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                  >
+                    <span id="battery_percentage"
+                      >{{ request.session.battery_percentage }}%</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div
+                class="info-card bg-info text-dark shadow-lg p-4 mb-4 text-center"
+                style="
+                  height: 180px;
+                  border-radius: 15px;
+                  box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+                "
+              >
+                <h5
+                  class="fw-bold mb-3"
+                  style="
+                    font-size: 1.4rem;
+                    text-transform: uppercase;
+                    letter-spacing: 1px;
+                  "
+                >
+                  🔋 Battery Usage
+                </h5>
+
+                <!-- Progress Bar for Battery Usage -->
+                <div
+                  class="progress mb-3"
+                  style="height: 15px; border-radius: 10px"
+                >
+                  <div
+                    class="progress-bar bg-success"
+                    role="progressbar"
+                    style="width: {{ battery_usage }}%"
+                    aria-valuenow="{{ battery_usage }}"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                  >
+                    <span class="visually-hidden"
+                      >{{ battery_usage }}% Battery Usage</span
+                    >
+                  </div>
+                </div>
+
+                <!-- Battery Usage Percentage -->
+                <p class="fs-5" style="font-size: 1rem">
+                  <strong class="text-success">{{ battery_usage }}%</strong>
+                  Performance
+                </p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div
+                class="info-card bg-danger text-white shadow-lg p-4 mb-4 text-center"
+                style="height: 180px"
+              >
+                <h5>🔥 Battery Temperature</h5>
+                <p class="fs-5">
+                  <strong>
+                    <span id="battery_temperature"
+                      >{{ request.session.battery_temperature }}°C</span
+                    ></strong
+                  >
+                </p>
+
+                <p>⚠️ High temperature detected!</p>
+              </div>
+            </div>
+          </div>
+          {% else %}
+          <!-- 🟠 CNG Stats -->
+          <div class="row">
+            <div class="col-md-4">
+              <div
+                class="info-card bg-warning text-dark shadow-lg p-4 mb-4 text-center"
+                style="height: 180px"
+              >
+                <h5>⛽ CNG Level</h5>
+                <div class="progress" style="height: 20px; border-radius: 10px">
+                  <div
+                    class="progress-bar bg-success"
+                    role="progressbar"
+                    id="cng_pressure"
+                    style="width: {{ cng_level }}%"
+                    aria-valuenow="{{ cng_level }}"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                  >
+                    <span id="cng_pressure"
+                      >{{ request.session.cng_pressure }} bar</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div
+                class="info-card bg-info text-dark shadow-lg p-4 mb-4 text-center"
+                style="height: 180px"
+              >
+                <h5>💨 CNG Temperature</h5>
+                <p class="fs-5">
+                  <strong
+                    ><span id="cng_temperature"
+                      >{{ request.session.cng_temperature }}°C</span
+                    ></strong
+                  >
+                </p>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div
+                class="info-card bg-danger text-white shadow-lg p-4 mb-4 text-center"
+                style="height: 180px"
+              >
+                <h5>🚨 Gas Leakage</h5>
+                <p id="gas_leak_detected">
+                  🔴 {% if request.session.gas_leak_detected %}
+                  <p>Leak Detected</p>
+                   {% else %}No Leakage Detected{% endif %}
+                </p>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+
+          <!-- 📊 Enhanced Performance Chart -->
+          <div
+            class="bg-dark text-white shadow-lg p-4 mb-4"
+            style="height: 500px"
+          >
+            <h5>📊 {{ customer_fuel_type }} Performance Trends</h5>
+            <canvas id="performanceChart"></canvas>
+          </div>
+
+          <!-- JavaScript for Chart -->
+          <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+          <script>
+           
+            // 🔋 Performance Chart (Battery or CNG)
+            const ctx1 = document
+              .getElementById("performanceChart")
+              .getContext("2d");
+            new Chart(ctx1, {
+              type: "line",
+              data: {
+                labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+                datasets: [
+                  {
+                    label: "{{ customer_fuel_type }} Efficiency",
+                    data: [80, 85, 78, 90, 75, 88],
+                    borderColor: "rgba(75, 192, 192, 1)",
+                    backgroundColor: "rgba(75, 192, 192, 0.2)",
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                  },
+                  {
+                    label: "Temperature Fluctuation",
+                    data: [30, 32, 35, 36, 37, 36],
+                    borderColor: "rgba(255, 206, 86, 1)",
+                    backgroundColor: "rgba(255, 206, 86, 0.2)",
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                  },
+                ],
+              },
+              options: {
+                responsive: true,
+                plugins: { legend: { display: true } },
+                scales: { y: { beginAtZero: true } },
+              },
+            });
+          </script>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

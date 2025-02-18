@@ -1,0 +1,200 @@
+{% extends 'core/base.html' %} {% load static %} {% block content %}
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Function to fetch and update vehicle data
+    function updateVehicleData() {
+      // Fetch updated vehicle data from the API
+      fetch("/api/vehicle-data/")
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data); // Debugging log
+
+          // Calculate battery usage
+          let batteryUsage = 100 - data.battery_percentage;
+
+          // Update the HTML elements with the new data
+          const batteryPercentageElem =
+            document.getElementById("battery_percentage");
+          const batteryTemperatureElem = document.getElementById(
+            "battery_temperature"
+          );
+          const cngPressureElem = document.getElementById("cng_pressure");
+          const cngTemperatureElem = document.getElementById("cng_temperature");
+          const gasLeakStatusElem = document.getElementById("gas_leak_status");
+
+          // Update only if the elements exist
+          if (batteryPercentageElem) {
+            batteryPercentageElem.innerText = `${data.battery_percentage}%`;
+          }
+          if (batteryTemperatureElem) {
+            batteryTemperatureElem.innerText = `${data.battery_temperature}°C`;
+          }
+          if (cngPressureElem) {
+            cngPressureElem.innerText = `${data.cng_pressure} bar`;
+          }
+          if (cngTemperatureElem) {
+            cngTemperatureElem.innerText = `${data.cng_temperature}°C`;
+          }
+          if (gasLeakStatusElem) {
+            gasLeakStatusElem.innerText = data.gas_leak_detected
+              ? "🚨 Yes"
+              : "✅ No";
+          }
+
+          // Update progress bars
+          const batteryPercentageBar = document.getElementById(
+            "battery_percentage_bar"
+          );
+          const batteryUsageBar = document.getElementById("battery_usage_bar");
+          const cngPressureBar = document.getElementById("cng_pressure_bar");
+
+          if (batteryPercentageBar) {
+            batteryPercentageBar.style.width = `${data.battery_percentage}%`;
+          }
+          if (batteryUsageBar) {
+            batteryUsageBar.style.width = `${batteryUsage}%`;
+          }
+          if (cngPressureBar) {
+            cngPressureBar.style.width = `${data.cng_pressure}%`;
+          }
+
+          // Update battery usage text
+          const batteryUsageText = document.getElementById("battery_usage");
+          if (batteryUsageText) {
+            batteryUsageText.innerText = `${batteryUsage}%`;
+          }
+        })
+        .catch((error) => console.error("Error fetching vehicle data:", error));
+    }
+
+    // Update every 2 seconds
+    setInterval(updateVehicleData, 2000);
+
+    // Call the update function immediately to show the data when the page loads
+    updateVehicleData();
+  });
+</script>
+<div class="container mt-4">
+  <div class="container mt-5" style="max-width: 900px">
+    <!-- Header Section -->
+    <div
+      class="card shadow-lg p-5 mb-4"
+      style="
+        background: linear-gradient(135deg, #6a11cb, #2575fc);
+        border-radius: 20px;
+        box-shadow: 0px 15px 30px rgba(0, 0, 0, 0.1);
+      "
+    >
+      <h1
+        class="text-center text-white fw-bold"
+        style="
+          font-size: 3rem;
+          padding: 25px;
+          text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.3);
+        "
+      >
+        🚨 Alerts & Notifications
+      </h1>
+      <p class="text-center text-white" style="font-size: 1.2rem; opacity: 0.8">
+        Stay updated with important vehicle notifications and ensure optimal
+        performance!
+      </p>
+    </div>
+
+    <div class="alert-container">
+      {% if alert_messages %} {% for alert in alert_messages %}
+      <div
+        class="alert alert-{{ alert.type }} shadow-lg"
+        role="alert"
+        id="alert_{{ forloop.counter }}"
+      >
+        <div class="d-flex justify-content-between align-items-center">
+          <span
+            class="alert-icon"
+            style="font-size: 1.7rem; padding-right: 10px"
+          >
+            {{ alert.icon }}
+          </span>
+          <div class="alert-text" style="text-align: left; width: 100%">
+            <!-- Ensure text is left aligned -->
+            <strong
+              class="d-block"
+              style="font-size: 1.2rem; font-weight: 600; color: #333"
+            >
+              {{ alert.title }}
+            </strong>
+            <span class="d-block" style="font-size: 1.1rem; color: #555">
+              {{ alert.message }}
+            </span>
+          </div>
+          <!-- Close Button -->
+          <button
+            type="button"
+            class="btn-close"
+            aria-label="Close"
+            onclick="closeAlert({{ forloop.counter }})"
+          ></button>
+        </div>
+      </div>
+      {% endfor %}{% else %}
+      <!-- Initially display "No Alerts!" message if no alerts exist -->
+      <div
+        class="alert alert-secondary shadow-lg text-center"
+        role="alert"
+        id="noAlertsMessage"
+      >
+        <strong>No Alerts!</strong> Your vehicle is in good condition.
+      </div>
+      {% endif %}
+    </div>
+    <div
+      class="alert alert-secondary shadow-lg text-center"
+      role="alert"
+      id="noAlertsMessage"
+    >
+      <strong>No Alerts!</strong> Your vehicle is in good condition.
+    </div>
+  </div>
+
+  <!-- Audio for Alert Sound -->
+  <audio
+    id="alertSound"
+    src="{% static 'audio/alert.mp3' %}"
+    preload="auto"
+  ></audio>
+
+  <!-- JavaScript to play sound and handle alert closure -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var alertSound = document.getElementById('alertSound');
+      var noAlertsMessage = document.getElementById('noAlertsMessage');
+      noAlertsMessage.style.display ='none'
+      // Check if there are any alert messages, and play sound if they exist
+      {% if alert_messages %}
+        alertSound.play().catch(function (e) {
+          console.log("Autoplay blocked, attempting to play sound.");
+        });
+      {% endif %}
+
+      // Function to handle closing an alert
+      window.closeAlert = function(alertId) {
+        var alertElement = document.getElementById('alert_' + alertId);
+        alertElement.style.display = 'none';  // Hide the alert element
+
+        // Check if all alerts are closed
+        var remainingAlerts = document.querySelectorAll('.alert-container .alert:not([style*="display: none"])');
+
+        // If no alerts are left, stop the sound and show "No Alerts!" message
+        if (remainingAlerts.length === 0) {
+          alertSound.pause();  // Stop the audio playback
+
+          noAlertsMessage.style.display = 'block'; // Show "No Alerts!" message
+
+        }
+      };
+    });
+  </script>
+</div>
+
+{% endblock %} {% block title %}Alerts{% endblock %}

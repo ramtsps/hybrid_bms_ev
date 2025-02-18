@@ -1,0 +1,7 @@
+{
+    "battery_percentage": 20,
+    "battery_temperature": 520.0,
+    "cng_pressure": 5.0,
+    "cng_temperature": 55.0,
+    "gas_leak_detected": true
+}

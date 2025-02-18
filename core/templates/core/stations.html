@@ -1,0 +1,258 @@
+{% extends 'core/base.html' %} {% block content %}
+
+<div class="container mt-5">
+  <!-- EV Stations Header -->
+  <div
+    class="card shadow-lg p-4 mb-4"
+    style="
+      background: linear-gradient(135deg, #00c6ff, #0072ff);
+      border-radius: 15px;
+      box-shadow: 0px 15px 25px rgba(0, 0, 0, 0.2);
+    "
+  >
+    <h1
+      class="text-center text-white fw-bold"
+      style="
+        font-size: 2.5rem;
+        padding: 20px;
+        text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+      "
+    >
+      🔌 Nearby EV Charging Stations
+    </h1>
+    <p
+      class="text-center text-white"
+      style="font-size: 1.1rem; padding-bottom: 20px"
+    >
+      Find the nearest EV charging stations, check availability, and plan your
+      trip effectively!
+    </p>
+  </div>
+
+  <div class="row">
+    <!-- 📍 OpenStreetMap Container -->
+    <div class="col-md-8">
+      <div
+        id="map"
+        class="shadow-lg"
+        style="height: 500px; border-radius: 15px"
+      ></div>
+    </div>
+
+    <!-- 🚗 EV Charging Stations List -->
+    <div class="col-md-4">
+      <div class="card shadow-lg p-3 glass-card mb-4">
+        <h4 class="text-center text-success fw-bold">📍 EV Stations</h4>
+        <hr />
+
+        <!-- Search Bar -->
+        <form method="GET" action="">
+          <div class="input-group mb-3">
+            <input
+              type="text"
+              name="search"
+              class="form-control"
+              placeholder="Search for stations by name or location"
+              value="{{ search_term }}"
+              aria-label="Search EV Stations"
+            />
+            <button class="btn btn-outline-secondary" type="submit">
+              Search
+            </button>
+          </div>
+        </form>
+
+        <!-- EV Stations List -->
+        <div class="list-group" id="evStationList">
+          {% if page_obj %} {% for station in page_obj %}
+          <a href="#" class="list-group-item list-group-item-action ev-station">
+            <h5 class="mb-1">🔋 {{ station.name }}</h5>
+            <p class="mb-1">📍 Location: {{ station.location }}</p>
+            <small>⚡ Available Slots: {{ station.slots }}</small>
+            <hr />
+          </a>
+          {% endfor %} {% else %}
+          <p class="text-center text-muted">
+            No stations found matching the search term.
+          </p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Pagination Controls -->
+      <div class="pagination-container text-center mt-4">
+        <span class="page-links">
+          {% if page_obj.has_previous %}
+          <a
+            href="?page=1&search={{ search_term }}"
+            class="btn btn-primary btn-sm"
+            >« First</a
+          >
+          <a
+            href="?page={{ page_obj.previous_page_number }}&search={{ search_term }}"
+            class="btn btn-secondary btn-sm"
+            >Previous</a
+          >
+          {% endif %}
+
+          <span class="current-page">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+          </span>
+
+          {% if page_obj.has_next %}
+          <a
+            href="?page={{ page_obj.next_page_number }}&search={{ search_term }}"
+            class="btn btn-secondary btn-sm"
+            >Next</a
+          >
+          <a
+            href="?page={{ page_obj.paginator.num_pages }}&search={{ search_term }}"
+            class="btn btn-primary btn-sm"
+            >Last »</a
+          >
+          {% endif %}
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- FAQ Section -->
+<div id="faq" class="container mt-5" style="max-width: 800px; margin: 0 auto">
+  <h3 class="text-center text-primary fw-bold">Frequently Asked Questions</h3>
+  <div class="accordion" id="faqAccordion">
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingOne">
+        <button
+          class="accordion-button"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#collapseOne"
+          aria-expanded="true"
+          aria-controls="collapseOne"
+        >
+          What are EV Charging Stations?
+        </button>
+      </h2>
+      <div
+        id="collapseOne"
+        class="accordion-collapse collapse show"
+        aria-labelledby="headingOne"
+        data-bs-parent="#faqAccordion"
+      >
+        <div class="accordion-body">
+          EV Charging Stations are locations where you can recharge your
+          electric vehicle. These stations offer different types of chargers for
+          various EV models.
+        </div>
+      </div>
+    </div>
+    <!-- Add more FAQs as necessary -->
+  </div>
+</div>
+
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Initialize map and set the default view
+    var map = L.map("map").setView([11.0168, 76.9558], 7);
+
+    // Load map tiles
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: '© <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
+    }).addTo(map);
+
+    // Custom EV Station Icon
+    var evIcon = L.icon({
+      iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
+      iconSize: [40, 40],
+      iconAnchor: [20, 40],
+      popupAnchor: [0, -35],
+    });
+
+    // EV Stations Data (Correct JSON Format)
+    var evStations = [
+      {% for station in page_obj %}
+        {
+          name: "{{ station.name }}",
+          location: "{{ station.location }}",
+          lat: {{ station.latitude }},  // Ensure this matches your model field
+          lon: {{ station.longitude }},  // Ensure this matches your model field
+          slots: {{ station.slots }},
+        },
+      {% endfor %}
+    ];
+
+    // Populate the map with markers
+    evStations.forEach(function (station) {
+      if (!isNaN(station.lat) && !isNaN(station.lon)) {
+        L.marker([station.lat, station.lon], { icon: evIcon })
+          .addTo(map)
+          .bindPopup(
+            `<strong>${station.name}</strong><br>📍 Location: ${station.location}<br>⚡ Available Slots: ${station.slots}`
+          );
+      } else {
+        console.log("Invalid coordinates for:", station.name);
+      }
+    });
+  });
+  fetch('/api/vehicle-data/')
+  .then(response => response.json())
+  .then(data => {
+    // Display vehicle data in your HTML
+    document.getElementById('battery_percentage').innerText = `${data.battery_percentage}%`;
+    document.getElementById('battery_temperature').innerText = `${data.battery_temperature}°C`;
+    document.getElementById('cng_pressure').innerText = `${data.cng_pressure} bar`;
+    document.getElementById('cng_temperature').innerText = `${data.cng_temperature}°C`;
+    document.getElementById('gas_leak_status').innerText = data.gas_leak_detected ? '🚨 Yes' : '✅ No';
+  })
+  .catch(error => console.error('Error fetching vehicle data:', error));
+</script>
+
+<!-- Custom Styling -->
+<style>
+  .glass-card {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px); /* Glassmorphism blur */
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 15px;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Hover Effects */
+  .glass-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.3);
+    backdrop-filter: none;
+  }
+
+  .ev-station {
+    transition: all 0.3s ease-in-out;
+  }
+
+  .ev-station:hover {
+    background: #d4edda;
+    transform: scale(1.05);
+  }
+
+  .pagination-container .page-links {
+    display: inline-block;
+    margin-top: 10px;
+  }
+
+  .pagination-container .btn {
+    margin: 0 5px;
+  }
+
+  .pagination-container .current-page {
+    font-weight: bold;
+    color: #0072ff;
+  }
+</style>
+
+{% endblock %}

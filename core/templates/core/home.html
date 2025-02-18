@@ -1,0 +1,183 @@
+{% extends 'core/base.html' %} {% load static %} {% block content %}
+
+<!-- Hero Section -->
+<header
+  class="text-white text-center py-5 fade-in animate__animated animate__fadeIn"
+  style="background: linear-gradient(135deg, #2b5876, #4e4376)"
+>
+  <div class="container">
+    <h1
+      class="display-3 fw-bold animate__animated animate__fadeIn animate__delay-1s"
+    >
+      🚗 Welcome to Hybrid BMS with EV Station Finder
+    </h1>
+    <p class="lead animate__animated animate__fadeIn animate__delay-2s">
+      Smart IoT-Based Battery & CNG Monitoring with Real-Time Alerts
+    </p>
+    <a
+      href="{% url 'dashboard' %}"
+      class="btn btn-info btn-lg shadow animate__animated animate__bounceIn animate__delay-3s"
+      >🚀 Start Monitoring</a
+    >
+  </div>
+</header>
+
+<!-- Features Section -->
+<div class="container text-center mt-5">
+  <h2 class="fw-bold animate__animated animate__fadeIn text-dark">
+    🚗 Key Features
+  </h2>
+  <div class="row mt-4">
+    <div class="col-md-4">
+      <div
+        class="card p-4 shadow-lg mb-3 rounded-3 animate__animated animate__fadeIn animate__delay-1s feature-card"
+      >
+        <i class="bi bi-battery-full fs-1 text-primary"></i>
+        <h4 class="mt-3">🔋 Real-Time Battery Monitoring</h4>
+        <p>
+          Get instant updates on your vehicle's battery status, voltage, and
+          temperature.
+        </p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div
+        class="card p-4 shadow-lg mb-3 rounded-3 animate__animated animate__fadeIn animate__delay-2s feature-card"
+      >
+        <i class="bi bi-geo-alt fs-1 text-success"></i>
+        <h4 class="mt-3">📍 EV Charging Station Finder</h4>
+        <p>
+          Locate the nearest charging stations with live availability updates.
+        </p>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div
+        class="card p-4 shadow-lg mb-3 rounded-3 animate__animated animate__fadeIn animate__delay-3s feature-card"
+      >
+        <i class="bi bi-bell fs-1 text-warning"></i>
+        <h4 class="mt-3">⚠️ Instant Alerts & Notifications</h4>
+        <p>
+          Receive alerts for gas leaks, battery overheating, and low charge.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- How It Works Section -->
+<section
+  class="py-5 mt-5"
+  style="background: linear-gradient(135deg, #004e92, #000428)"
+>
+  <div class="container text-center">
+    <h2 class="fw-bold text-white animate__animated animate__fadeIn">
+      ⚙️ How It Works
+    </h2>
+    <div class="row mt-4">
+      <div class="col-md-3">
+        <div
+          class="p-4 shadow-lg rounded-3 bg-light text-dark animate__animated animate__fadeIn animate__delay-1s feature-card"
+        >
+          <i class="bi bi-cloud-arrow-down fs-1 text-primary"></i>
+          <h5 class="mt-3">📡 Collect Sensor Data</h5>
+          <p>Gather temperature, gas leakage, and battery data in real time.</p>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div
+          class="p-4 shadow-lg rounded-3 bg-light text-dark animate__animated animate__fadeIn animate__delay-2s feature-card"
+        >
+          <i class="bi bi-wifi fs-1 text-success"></i>
+          <h5 class="mt-3">📤 Send Data to Cloud</h5>
+          <p>Transmit data to our secure cloud platform via IoT.</p>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div
+          class="p-4 shadow-lg rounded-3 bg-light text-dark animate__animated animate__fadeIn animate__delay-3s feature-card"
+        >
+          <i class="bi bi-bar-chart fs-1 text-warning"></i>
+          <h5 class="mt-3">📊 Analyze & Monitor</h5>
+          <p>View real-time analytics & trends on our dashboard.</p>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div
+          class="p-4 shadow-lg rounded-3 bg-light text-dark animate__animated animate__fadeIn animate__delay-4s feature-card"
+        >
+          <i class="bi bi-bell-fill fs-1 text-danger"></i>
+          <h5 class="mt-3">🚨 Get Instant Alerts</h5>
+          <p>Receive emergency alerts for safety hazards.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Call to Action -->
+<div class="d-flex justify-content-center mt-5">
+  <div
+    class="text-center py-5 px-4 rounded-3 shadow-lg animate__animated animate__fadeIn animate__delay-5s"
+    style="
+      background: linear-gradient(135deg, #00c6ff, #0072ff);
+      color: white;
+      max-width: 800px;
+      width: 100%;
+    "
+  >
+    <h2 class="fw-bold">🚀 Take Control of Your EV Safety Now!</h2>
+    <p class="lead">
+      Join our platform today to experience a smarter and safer ride.
+    </p>
+    <a
+      href="{% url 'register' %}"
+      class="btn btn-light btn-lg shadow animate__animated animate__fadeIn animate__delay-6s"
+    >
+      ✅ Sign Up Now
+    </a>
+  </div>
+</div>
+
+<br /><br />
+<style>
+  .feature-card {
+    transition: transform 0.4s ease, box-shadow 0.4s ease, background 0.4s ease;
+    border-radius: 15px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .feature-card:hover {
+    transform: translateY(-15px) scale(1.05);
+
+    background: linear-gradient(135deg, #f5f7fa, #ffffffff);
+  }
+
+  .feature-card:hover::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .feature-card:hover::before {
+    opacity: 1;
+  }
+
+  .feature-card:hover h4 {
+    color: #0072ff;
+    transition: color 0.3s ease-in-out;
+  }
+
+  .feature-card:hover i {
+    color: #00aaff;
+    transition: color 0.3s ease-in-out;
+  }
+</style>
+{% endblock %} {% block title %}Home{% endblock %}
