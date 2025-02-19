@@ -29,13 +29,13 @@
             </div>
             <div class="mb-3">
               <label class="form-label">Vehicle Type</label>
-              <input
-                type="text"
-                name="vehicle_type"
-                class="form-control"
-                required
-              />
+              <select name="vehicle_type" class="form-control" required>
+                <option value="" disabled selected>Select Vehicle Type</option>
+                <option value="Car">🚗 Car</option>
+                <option value="Bike">🏍️ Bike</option>
+              </select>
             </div>
+
             <div class="mb-3">
               <label class="form-label">Vehicle Number</label>
               <input
@@ -46,12 +46,14 @@
               />
             </div>
             <div class="mb-3">
-              <label class="form-label">CNG or Battery</label>
-              <select name="fuel_type" class="form-control">
-                <option value="CNG">CNG</option>
-                <option value="Battery">Battery</option>
+              <label class="form-label">Fuel Type</label>
+              <select name="fuel_type" class="form-control" required>
+                <option value="" disabled selected>Select Fuel Type</option>
+                <option value="CNG">⛽ CNG</option>
+                <option value="Battery">🔋 Battery</option>
               </select>
             </div>
+
             <div class="mb-3">
               <label class="form-label">Password</label>
               <input
